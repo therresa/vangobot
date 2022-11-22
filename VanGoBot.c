@@ -34,6 +34,47 @@ task main()
 
 }
 
+void movePen(int xPower, int yPower){
+	motor[motorA] = xPower;
+	motor[motorB] = yPower;
+}
+
+void autoMovePen(float x, float y){
+
+}
+
+void manualMove(){
+	while(getButtonPress(buttonBack)){
+		if(getButtonPress(buttonUp)){
+			movePen(0, 50);
+		}
+		else if(getButtonPress(buttonDown)){
+			movePen(0, -50);
+		}
+		else if(getButtonPress(buttonLeft)){
+			movePen(-50, 0);
+		}
+		else if(getButtonPress(buttonRight)){
+			movePen(50, 0);
+		}
+		else{
+			movePen(0, 0);
+		}
+	}
+}
+
+void home(){
+		movePen(50, 0);
+		while(!SensorValue[S1]) {}
+		movePen(0, 50);
+		while(SensorValue[S2] > Y_AXIS_HOME_DISTANCE){}
+		movePen(0, 0);
+}
+
+void mainMenu(){
+
+}
+
 void configureSensors()
 {
 	SensorType[S1] = sensorEV3_Touch;
