@@ -5,6 +5,12 @@ Version: 1.0
 Description: Functions written in ROBOTC for VanGoBot to be deployed
 on EV3 brick.
 */
+#pragma SystemFile
+
+// select EV3 set of functions
+#define _EV3FILEIO 1
+
+#include "PC_FileIO.c"
 
 //Global constants
 const float ENCODER_TO_INCH = 0, PEN_UP = 0, PEN_DOWN = 0, GANTRY_KP = 0,
@@ -22,9 +28,10 @@ void movePen(int xPower, int yPower);
 void autoMovePen(float x, float y);
 void liftLowerPen(bool lifted);
 void home();
-bool readNextCommand(/*another parameter for fileio??*/struct MotorCommand &motorCommand);
+bool readNextCommand(TFileHandle &fin, struct MotorCommand &motorCommand);
 void manualMove();
-void automaticMode(/*another parameter for fileio??*/float x, float y, float size);
+void convertFileXYToPaperXY(float autoX, float autoY, float size, struct MotorCommand &motorCommand)
+void automaticMode(TFileHandle &fin, float x, float y, float size);
 void automaticModeMenu();
 void mainMenu();
 void configureSensors();
@@ -71,8 +78,26 @@ void home(){
 		movePen(0, 0);
 }
 
-void mainMenu(){
+bool readNextCommand(TFileHandle &fin, struct MotorCommand &motorCommand){
+	int liftPen;
+	float x;
+	float y;
+	readFloatPC(fin, x);
+	readFloatPC(fin, y);
+	readIntPc(fin, liftPen);
+	motorCommand.x = x;
+	motorCommand.y = y;
+	motorCommand.liftPen = liftPen==1;
+}
 
+void automaticMode(TFileHandle &fin, float x, float y, float size){
+		struct MotorCommand motorCommand;
+		while(!getButtonPress(BACK_BUTTON) && readNextCommand(fin, motorCommand)){
+				convertFileXYToPaperXY(x, y, size, motorCommand);
+				liftLowerPen(motorCommand.liftPen);
+				autoMovePen(motorCommand.x, motorCommand.y);
+		}
+		movePen(0, 0);
 }
 
 void configureSensors()
