@@ -4,6 +4,7 @@ Group 4-17
 Version: 1.0
 Description: Functions written in ROBOTC for VanGoBot to be deployed
 on EV3 brick.
+Drain gang
 */
 
 //Global constants
@@ -28,10 +29,13 @@ void automaticMode(/*another parameter for fileio??*/float x, float y, float siz
 void automaticModeMenu();
 void mainMenu();
 void configureSensors();
+void shutcoGoofyAhhUp();
 
 task main()
 {
-
+	while (true) {
+		mainMenu();
+	}
 }
 
 void configureSensors()
@@ -44,14 +48,29 @@ void configureSensors()
 
 void mainMenu()
 {
+	int count = 1;
+	string menuOptions[] = {"Manual", "File Print", "Exit"};
+
 	//Title
-	displayBigTextLine(1, "VanGoBot");
-	displayTextLine(3, "Select a drawing mode:");
+	displayCenteredBigTextLine(1, "VanGoBot");
+	displayCenteredTextLine(4, "Select a drawing mode:");
 
 	//Options
-	displayTextLine(5, "Manual");
-	displayTextLine(7, "File Print");
+	displayInverseBigStringAt(20, 60, menuOptions[0]);
+	displayBigStringAt(20, 40, menuOptions[1]);
+	displayBigStringAt(20, 20, menuOptions[2]);
 
-	//Display rect around the selected option
-	//drawRect()
+	while (count <= 3)
+	{
+		if (count == 3)
+		{
+			count = 1;
+		}
+
+		while (!getButtonPress(DOWN_BUTTON))
+		{}
+		displayInverseBigStringAt(20, 60 - (20 * (count - 1)), menuOptions[count - 1]);
+		displayInverseBigStringAt(20, 60 - (20 * count), menuOptions[count]);
+		count++;
+	}
 }
