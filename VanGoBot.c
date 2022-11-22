@@ -31,7 +31,7 @@ void configureSensors();
 
 task main()
 {
-	return EXIT_SUCCESS;
+
 }
 
 void configureSensors()
