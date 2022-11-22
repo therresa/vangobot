@@ -31,7 +31,7 @@ void liftLowerPen(bool lifted);
 void home();
 bool readNextCommand(TFileHandle &fin, struct MotorCommand &motorCommand);
 void manualMove();
-void convertFileXYToPaperXY(float autoX, float autoY, float size, struct MotorCommand &motorCommand)
+void convertFileXYToPaperXY(float autoX, float autoY, float size, struct MotorCommand &motorCommand);
 void automaticMode(TFileHandle &fin, float x, float y, float size);
 void automaticModeMenu();
 void mainMenu();
@@ -85,6 +85,22 @@ void home(){
 		movePen(0, 0);
 }
 
+void liftLowerPen(bool lifted){
+
+}
+
+void convertFileXYToPaperXY(float autoX, float autoY, float size, struct MotorCommand &motorCommand){
+
+}
+
+void automaticMode(TFileHandle &fin, float x, float y, float size){
+
+}
+
+void automaticModeMenu(){
+
+}
+
 bool readNextCommand(TFileHandle &fin, struct MotorCommand &motorCommand){
 	int liftPen;
 	float x;
@@ -95,6 +111,7 @@ bool readNextCommand(TFileHandle &fin, struct MotorCommand &motorCommand){
 	motorCommand.x = x;
 	motorCommand.y = y;
 	motorCommand.liftPen = liftPen==1;
+	return true;
 }
 
 void automaticMode(TFileHandle &fin, float x, float y, float size){
@@ -151,9 +168,9 @@ void mainMenu()
 		}
 		else if (getButtonPress(UP_BUTTON))
 		{
-			displayBigStringAt(20, 60 - (20 * count), menuOptions[count];
-			displayInverseBigStringAt(20, 60 - (20 * (count + 1)), menuOptions[count + 1]));
-			count++;
+			displayBigStringAt(20, 60 - (20 * count), menuOptions[count]);
+			displayInverseBigStringAt(20, 60 - (20 * (count + 1)), menuOptions[count + 1]);
+			count--;
 		}
 
 		// if enter button is pressed, call the functions for the correct mode
@@ -178,5 +195,6 @@ void mainMenu()
 
 void shutcoGoofyAhhDown()
 {
-
+	movePen(0, 0);
+	liftPen(true);
 }
