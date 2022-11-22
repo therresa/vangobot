@@ -82,3 +82,17 @@ void configureSensors()
   SensorType[S2] = sensorEV3_Ultrasonic;
   wait1Msec(50);
 }
+
+void mainMenu()
+{
+	//Title
+	displayBigTextLine(1, "VanGoBot");
+	displayTextLine(3, "Select a drawing mode:");
+
+	//Options
+	displayTextLine(5, "Manual");
+	displayTextLine(7, "File Print");
+
+	//Display rect around the selected option
+	//drawRect()
+}
