@@ -13,18 +13,18 @@ Drain gang
 
 #include "PC_FileIO.c"
 
-//Global constants
+// global constants
 const float ENCODER_TO_INCH = 0, PEN_UP = 0, PEN_DOWN = 0, GANTRY_KP = 0,
 PEN_KP = 0, Y_AXIS_HOME_DISTANCE = 0;
 
-//MotorCommand struct
+// MotorCommand struct
 struct MotorCommand {
     float x;
     float y;
     bool liftPen;
 }
 
-//Prototypes
+// prototypes
 void movePen(int xPower, int yPower);
 void autoMovePen(float x, float y);
 void liftLowerPen(bool lifted);
@@ -36,21 +36,24 @@ void automaticMode(TFileHandle &fin, float x, float y, float size);
 void automaticModeMenu();
 void mainMenu();
 void configureSensors();
-void shutcoGoofyAhhUp();
+void shutcoGoofyAhhDown();
 
 task main()
 {
-	while (true) {
+	while (true)
+	{
 		mainMenu();
 	}
 }
 
-void movePen(int xPower, int yPower){
+void movePen(int xPower, int yPower)
+{
 	motor[motorA] = xPower;
 	motor[motorB] = yPower;
 }
 
-void autoMovePen(float x, float y){
+void autoMovePen(float x, float y)
+{
 
 }
 
@@ -96,10 +99,11 @@ bool readNextCommand(TFileHandle &fin, struct MotorCommand &motorCommand){
 
 void automaticMode(TFileHandle &fin, float x, float y, float size){
 		struct MotorCommand motorCommand;
-		while(!getButtonPress(BACK_BUTTON) && readNextCommand(fin, motorCommand)){
-				convertFileXYToPaperXY(x, y, size, motorCommand);
-				liftLowerPen(motorCommand.liftPen);
-				autoMovePen(motorCommand.x, motorCommand.y);
+		while(!getButtonPress(BACK_BUTTON) && readNextCommand(fin, motorCommand))
+		{
+			convertFileXYToPaperXY(x, y, size, motorCommand);
+			liftLowerPen(motorCommand.liftPen);
+			autoMovePen(motorCommand.x, motorCommand.y);
 		}
 		movePen(0, 0);
 }
@@ -117,11 +121,11 @@ void mainMenu()
 	int count = 1;
 	string menuOptions[] = {"Manual", "File Print", "Exit"};
 
-	//Title
+	// title
 	displayCenteredBigTextLine(1, "VanGoBot");
 	displayCenteredTextLine(4, "Select a drawing mode:");
 
-	//Options
+	// options
 	displayInverseBigStringAt(20, 60, menuOptions[0]);
 	displayBigStringAt(20, 40, menuOptions[1]);
 	displayBigStringAt(20, 20, menuOptions[2]);
@@ -133,10 +137,46 @@ void mainMenu()
 			count = 1;
 		}
 
-		while (!getButtonPress(DOWN_BUTTON))
+		while (!getButtonPress(DOWN_BUTTON) && !getButtonPress(UP_BUTTON) && !getButtonPress(ENTER_BUTTON))
 		{}
-		displayInverseBigStringAt(20, 60 - (20 * (count - 1)), menuOptions[count - 1]);
-		displayInverseBigStringAt(20, 60 - (20 * count), menuOptions[count]);
-		count++;
+
+		// could possibly use ternary operators instead here but do we care about efficiency? :D
+
+		// navigating options
+		if (getButtonPress(DOWN_BUTTON))
+		{
+			displayBigStringAt(20, 60 - (20 * (count - 1)), menuOptions[count - 1]);
+			displayInverseBigStringAt(20, 60 - (20 * count), menuOptions[count]);
+			count++;
+		}
+		else if (getButtonPress(UP_BUTTON))
+		{
+			displayBigStringAt(20, 60 - (20 * count), menuOptions[count];
+			displayInverseBigStringAt(20, 60 - (20 * (count + 1)), menuOptions[count + 1]));
+			count++;
+		}
+
+		// if enter button is pressed, call the functions for the correct mode
+		else if (getButtonPress(ENTER_BUTTON))
+		{
+			if (count == 0)
+			{
+				manualMove();
+			}
+			else if (count == 1)
+			{
+				automaticModeMenu();
+			}
+			else
+			{
+				// call shutdown procedure
+				shutcoGoofyAhhDown();
+			}
+		}
 	}
+}
+
+void shutcoGoofyAhhDown()
+{
+
 }
