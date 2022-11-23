@@ -15,7 +15,8 @@ Drain
 
 // global constants
 const float ENCODER_TO_INCH = 0, PEN_UP = 0, PEN_DOWN = 0, GANTRY_KP = 0,
-PEN_KP = 0, Y_AXIS_HOME_DISTANCE = 0, LIFT_PEN_THRESHOLD = 0, GANTRY_THRESHOLD = 0;
+						PEN_KP = 0, Y_AXIS_HOME_DISTANCE = 0, LIFT_PEN_THRESHOLD = 0,
+						GANTRY_THRESHOLD = 0;
 
 // MotorCommand struct
 struct MotorCommand {
@@ -111,11 +112,13 @@ void automaticMode(TFileHandle &fin, float x, float y, float size){
 	}
 }
 
-void automaticModeMenu(){
+void automaticModeMenu()
+{
 
 }
 
-bool readNextCommand(TFileHandle &fin, struct MotorCommand &motorCommand){
+bool readNextCommand(TFileHandle &fin, struct MotorCommand &motorCommand)
+{
 	int liftPen = 0;
 	float x = 0.0;
 	float y = 0.0;
@@ -150,6 +153,7 @@ void configureSensors()
 
 void mainMenu()
 {
+	eraseDisplay();
 	int count = 0;
 	string menuOptions[] = {"Manual", "File Print", "Exit"};
 
@@ -189,6 +193,8 @@ void mainMenu()
 		// if enter button is pressed, call the functions for the correct mode
 		else if (getButtonPress(ENTER_BUTTON))
 		{
+			while (getButtonPress(DOWN_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(ENTER_BUTTON))
+			{}
 			if (count == 0)
 			{
 				manualMove();
@@ -219,7 +225,49 @@ void mainMenu()
 
 void shutcoGoofyAhhDown()
 {
-	liftLowerPen(true);
-	home();
-	movePen(0, 0);
+	// are you sure?
+	eraseDisplay();
+	displayCenteredBigTextLine(0, "Are you sure");
+	displayCenteredBigTextLine(2, "you want");
+	displayCenteredBigTextLine(4, "to shut down");
+	displayCenteredBigTextLine(6, "VanGoBot? :(");
+
+	//options
+	displayBigStringAt(20, 50, "Yes");
+	displayInverseBigStringAt(20, 30, "No");
+
+	//toggle between options
+	int option = 2;
+	while (true)
+	{
+		while (!getButtonPress(DOWN_BUTTON) && !getButtonPress(UP_BUTTON) && !getButtonPress(ENTER_BUTTON))
+		{}
+		if (getButtonPress(DOWN_BUTTON))
+		{
+			displayBigStringAt(20, 50, "Yes");
+			displayInverseBigStringAt(20, 30, "No");
+			option = 2;
+		}
+		else if(getButtonPress(UP_BUTTON))
+		{
+			displayInverseBigStringAt(20, 50, "Yes");
+			displayBigStringAt(20, 30, "No");
+			option = 1;
+		}
+		if (getButtonPress(ENTER_BUTTON))
+		{
+			if (option == 2)
+			{
+				mainMenu();
+			}
+			else if (option == 1)
+			{
+				liftLowerPen(true);
+				home();
+				movePen(0, 0);
+			}
+		}
+		while (getButtonPress(DOWN_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(ENTER_BUTTON))
+		{}
+	}
 }
