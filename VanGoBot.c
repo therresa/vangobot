@@ -4,7 +4,7 @@ Group 4-17
 Version: 1.0
 Description: Functions written in ROBOTC for VanGoBot to be deployed
 on EV3 brick.
-Drain gang
+Drain
 */
 #pragma SystemFile
 
