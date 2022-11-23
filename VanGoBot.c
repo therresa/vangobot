@@ -141,7 +141,6 @@ void mainMenu()
 		{}
 
 		// could possibly use ternary operators instead here but do we care about efficiency? :D
-
 		// navigating options
 		if (getButtonPress(DOWN_BUTTON))
 		{
@@ -152,7 +151,7 @@ void mainMenu()
 		else if (getButtonPress(UP_BUTTON))
 		{
 			displayBigStringAt(20, 60 - (20 * count), menuOptions[count];
-			displayInverseBigStringAt(20, 60 - (20 * (count + 1)), menuOptions[count + 1]));
+			displayInverseBigStringAt(20, 60 - (20 * (count + 1)), menuOptions[count + 1]);
 			count++;
 		}
 
