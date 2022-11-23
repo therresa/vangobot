@@ -135,43 +135,42 @@ void configureSensors()
 
 void mainMenu()
 {
-	int count = 1;
+	int count = 0;
 	string menuOptions[] = {"Manual", "File Print", "Exit"};
 
 	// title
 	displayCenteredBigTextLine(1, "VanGoBot");
-	displayCenteredTextLine(4, "Select a drawing mode:");
+	drawEllipse(35, 125, 140, 100);
+	drawEllipse(35, 122, 140, 97);
+	displayCenteredBigTextLine(4, "Select a mode:");
 
-	// options
-	displayInverseBigStringAt(20, 60, menuOptions[0]);
-	displayBigStringAt(20, 40, menuOptions[1]);
-	displayBigStringAt(20, 20, menuOptions[2]);
-
-	while (count <= 3)
+	// options select
+	while (count < 3)
 	{
-		if (count == 3)
-		{
-			count = 1;
+		if(count == 0){
+			displayInverseBigStringAt(20, 60, menuOptions[0]);
+			displayBigStringAt(20, 40, menuOptions[1]);
+			displayBigStringAt(20, 20, menuOptions[2]);
 		}
-
+		if(count == 1){
+			displayBigStringAt(20, 60, menuOptions[0]);
+			displayInverseBigStringAt(20, 40, menuOptions[1]);
+			displayBigStringAt(20, 20, menuOptions[2]);
+		}
+		if(count == 2){
+			displayBigStringAt(20, 60, menuOptions[0]);
+			displayBigStringAt(20, 40, menuOptions[1]);
+			displayInverseBigStringAt(20, 20, menuOptions[2]);
+		}
 		while (!getButtonPress(DOWN_BUTTON) && !getButtonPress(UP_BUTTON) && !getButtonPress(ENTER_BUTTON))
 		{}
 
-		// could possibly use ternary operators instead here but do we care about efficiency? :D
-		// navigating options
-		if (getButtonPress(DOWN_BUTTON))
-		{
-			displayBigStringAt(20, 60 - (20 * (count - 1)), menuOptions[count - 1]);
-			displayInverseBigStringAt(20, 60 - (20 * count), menuOptions[count]);
+		if(getButtonPress(DOWN_BUTTON)){
 			count++;
 		}
-		else if (getButtonPress(UP_BUTTON))
-		{
-			displayBigStringAt(20, 60 - (20 * count), menuOptions[count]);
-			displayInverseBigStringAt(20, 60 - (20 * (count + 1)), menuOptions[count + 1]);
+		else if(getButtonPress(UP_BUTTON)){
 			count--;
 		}
-
 		// if enter button is pressed, call the functions for the correct mode
 		else if (getButtonPress(ENTER_BUTTON))
 		{
@@ -189,11 +188,22 @@ void mainMenu()
 				shutcoGoofyAhhDown();
 			}
 		}
+
+		if(count >= 3){
+			count = 0;
+		}
+		if(count <= -1){
+			count = 2;
+		}
+
+		//Wait until button released
+		while (getButtonPress(DOWN_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(ENTER_BUTTON))
+		{}
 	}
 }
 
 void shutcoGoofyAhhDown()
 {
 	movePen(0, 0);
-	liftPen(true);
+	liftLowerPen(true);
 }
