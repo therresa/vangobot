@@ -15,7 +15,7 @@ Drain
 
 // global constants
 const float ENCODER_TO_INCH = 0, PEN_UP = 0, PEN_DOWN = 0, GANTRY_KP = 0,
-PEN_KP = 0, Y_AXIS_HOME_DISTANCE = 0;
+PEN_KP = 0, Y_AXIS_HOME_DISTANCE = 0, LIFT_PEN_THRESHOLD = 0, GANTRY_THRESHOLD = 0;
 
 // MotorCommand struct
 struct MotorCommand {
@@ -86,15 +86,29 @@ void home(){
 }
 
 void liftLowerPen(bool lifted){
-
+	float target = lifted?PEN_UP:PEN_DOWN;
+	float measured = nMotorEncoder[motorC];
+	while(abs(target-measured)<LIFT_PEN_THRESHOLD && !getButtonPress(BACK_BUTTON)){
+		measured = nMotorEncoder[motorC];
+		float error = target-measured;
+		float output = error*PEN_KP;
+		motor[motorC] = output;
+		wait1Msec(100);
+	}
 }
 
+//assume the motorCommand x and y is normalized (between 0 and 1).
 void convertFileXYToPaperXY(float autoX, float autoY, float size, struct MotorCommand &motorCommand){
-
+	motorCommand.x = autoX + motorCommand.x*size;
+	motorCommand.y = autoY + motorCommand.y*size;
 }
 
 void automaticMode(TFileHandle &fin, float x, float y, float size){
-
+	struct MotorCommand motorCommand;
+	while(readNextCommand(fin, motorCommand) && getButtonPress(BACK_BUTTON)){
+		liftLowerPen(motorCommand.liftPen);
+		autoMovePen(motorCommand.x, motorCommand.y);
+	}
 }
 
 void automaticModeMenu(){
@@ -102,16 +116,17 @@ void automaticModeMenu(){
 }
 
 bool readNextCommand(TFileHandle &fin, struct MotorCommand &motorCommand){
-	int liftPen;
-	float x;
-	float y;
-	readFloatPC(fin, x);
-	readFloatPC(fin, y);
-	readIntPc(fin, liftPen);
+	int liftPen = 0;
+	float x = 0.0;
+	float y = 0.0;
+	bool success = true;
+	success = success && readFloatPC(fin, x);
+	success = success && readFloatPC(fin, y);
+	success = success && readIntPc(fin, liftPen);
 	motorCommand.x = x;
 	motorCommand.y = y;
 	motorCommand.liftPen = liftPen==1;
-	return true;
+	return success;
 }
 
 void automaticMode(TFileHandle &fin, float x, float y, float size){
@@ -204,6 +219,7 @@ void mainMenu()
 
 void shutcoGoofyAhhDown()
 {
-	movePen(0, 0);
 	liftLowerPen(true);
+	home();
+	movePen(0, 0);
 }
