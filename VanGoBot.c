@@ -4,7 +4,7 @@ Group 4-17
 Version: 1.0
 Description: Functions written in ROBOTC for VanGoBot to be deployed
 on EV3 brick.
-Drain gang
+Drain
 */
 #pragma SystemFile
 
@@ -173,7 +173,6 @@ void mainMenu()
 		{}
 
 		// could possibly use ternary operators instead here but do we care about efficiency? :D
-
 		// navigating options
 		if (getButtonPress(DOWN_BUTTON))
 		{
