@@ -115,9 +115,6 @@ void manualMode(){
 		else if(getButtonPress(buttonDown) && !getButtonPress(buttonUp)){
 			y = -20;
 		}
-		else if(getButtonPress(buttonUp) && getButtonPress(buttonDown)){
-			playTone(400, 500);
-		}
 		else{
 			y = 0;
 		}
@@ -126,9 +123,6 @@ void manualMode(){
 		}
 		else if(getButtonPress(buttonRight)){
 			x = 20;
-		}
-		else if(getButtonPress(buttonLeft) && getButtonPress(buttonRight)){
-			playTone(400, 500);
 		}
 		else{
 			x = 0;
