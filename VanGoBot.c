@@ -16,7 +16,7 @@ Drain
 // global constants
 const float ENCODER_TO_INCH = 3.0/228.0, PEN_UP = 30, PEN_DOWN = 0, GANTRY_KP = 0.5,
 						PEN_KP = 0.5, Y_AXIS_HOME_DISTANCE = 4.7, LIFT_PEN_THRESHOLD = 10,
-						GANTRY_THRESHOLD = 0, MIN_X = 0, MAX_X = 530, MIN_Y = 0, MAX_Y = 400;
+						GANTRY_THRESHOLD = 10, MIN_X = 0, MAX_X = 530, MIN_Y = 0, MAX_Y = 420;
 
 // MotorCommand struct
 struct MotorCommand {
@@ -38,6 +38,7 @@ void automaticModeMenu();
 void mainMenu();
 void configureSensors();
 void shutcoGoofyAhhDown();
+void fileSelectMenu(string &fileName);
 
 task main()
 {
@@ -183,6 +184,8 @@ void convertFileXYToPaperXY(float autoX, float autoY, float size, struct MotorCo
 
 void automaticModeMenu()
 {
+	string fileName = "";
+	fileSelectMenu(fileName);
 	eraseDisplay();
 
 	// set width
@@ -275,8 +278,50 @@ void automaticModeMenu()
 	while (getButtonPress(ENTER_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(DOWN_BUTTON)) { }
 
 	TFileHandle fin;
-	bool fileOkay = openReadPC(fin,"test_fileio.txt");
+	bool fileOkay = openReadPC(fin,fileName);
 	automaticMode(fin, x, y, width);
+}
+
+string files[] = {
+	"test_fileio.txt",
+	"test1.txt",
+	"test2.txt",
+	"test3.txt",
+	"test4.txt"
+};
+
+void fileSelectMenu(string &fileName){
+	int selected = (sizeof(files)/sizeof(files[0]))-1;
+	while(!getButtonPress(ENTER_BUTTON)){
+		eraseDisplay();
+		displayBigTextLine(1, "Select File");
+
+		for(int i = -1; i <= 1; i++){
+			if(i == 0){
+					displayInverseBigStringAt(20, 60+20*i, files[selected]);
+			}
+			else if(i+selected >= 0 && i+selected < (sizeof(files)/sizeof(files[0]))){
+					displayBigStringAt(20, 60+20*i, files[selected+i]);
+			}
+		}
+
+		while(!getButtonPress(UP_BUTTON) && !getButtonpress(DOWN_BUTTON) && !getButtonPress(ENTER_BUTTON)){}
+		if(getButtonPress(UP_BUTTON)){
+			selected++;
+		}
+		if(getButtonPress(DOWN_BUTTON)){
+			selected--;
+		}
+		if(selected <= 0){
+			selected = 0;
+		}
+		if(selected >= (sizeof(files)/sizeof(files[0]))-1){
+			selected = (sizeof(files)/sizeof(files[0]))-1;
+		}
+		while(getButtonPress(UP_BUTTON) || getButtonpress(DOWN_BUTTON)){}
+	}
+	while(getButtonPress(ENTER_BUTTON)){}
+	fileName = files[selected];
 }
 
 bool readNextCommand(TFileHandle &fin, struct MotorCommand &motorCommand)
