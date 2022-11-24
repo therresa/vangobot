@@ -38,7 +38,7 @@ void automaticModeMenu();
 void mainMenu();
 void configureSensors();
 void shutcoGoofyAhhDown();
-string fileSelectMenu();
+void fileSelectMenu(string &fileName);
 
 task main()
 {
@@ -176,6 +176,8 @@ void convertFileXYToPaperXY(float autoX, float autoY, float size, struct MotorCo
 
 void automaticModeMenu()
 {
+	string fileName = "";
+	fileSelectMenu(fileName);
 	eraseDisplay();
 
 	// set width
@@ -268,7 +270,7 @@ void automaticModeMenu()
 	while (getButtonPress(ENTER_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(DOWN_BUTTON)) { }
 
 	TFileHandle fin;
-	bool fileOkay = openReadPC(fin,"test_fileio.txt");
+	bool fileOkay = openReadPC(fin,fileName);
 	automaticMode(fin, x, y, width);
 }
 
@@ -278,18 +280,19 @@ string files[] = {
 	"test2.txt",
 	"test3.txt",
 	"test4.txt"
-}
-string fileSelectMenu(){
-	int selected = 0;
+};
+
+void fileSelectMenu(string &fileName){
+	int selected = (sizeof(files)/sizeof(files[0]))-1;
 	while(!getButtonPress(ENTER_BUTTON)){
 		eraseDisplay();
 		displayBigTextLine(1, "Select File");
 
-		for(int i = -1; i < 1; i++){
+		for(int i = -1; i <= 1; i++){
 			if(i == 0){
 					displayInverseBigStringAt(20, 60+20*i, files[selected]);
 			}
-			else{
+			else if(i+selected >= 0 && i+selected < (sizeof(files)/sizeof(files[0]))){
 					displayBigStringAt(20, 60+20*i, files[selected+i]);
 			}
 		}
@@ -301,10 +304,16 @@ string fileSelectMenu(){
 		if(getButtonPress(DOWN_BUTTON)){
 			selected--;
 		}
+		if(selected <= 0){
+			selected = 0;
+		}
+		if(selected >= (sizeof(files)/sizeof(files[0]))-1){
+			selected = (sizeof(files)/sizeof(files[0]))-1;
+		}
 		while(getButtonPress(UP_BUTTON) || getButtonpress(DOWN_BUTTON)){}
 	}
 	while(getButtonPress(ENTER_BUTTON)){}
-	return files[selected];
+	fileName = files[selected];
 }
 
 bool readNextCommand(TFileHandle &fin, struct MotorCommand &motorCommand)
