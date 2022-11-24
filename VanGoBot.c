@@ -14,8 +14,8 @@ Drain
 #include "PC_FileIO.c"
 
 // global constants
-const float ENCODER_TO_INCH = 0, PEN_UP = 0, PEN_DOWN = 0, GANTRY_KP = 0,
-						PEN_KP = 0, Y_AXIS_HOME_DISTANCE = 0, LIFT_PEN_THRESHOLD = 0,
+const float ENCODER_TO_INCH = 0, PEN_UP = 30, PEN_DOWN = 0, GANTRY_KP = 0,
+						PEN_KP = 0.5, Y_AXIS_HOME_DISTANCE = 4.7, LIFT_PEN_THRESHOLD = 10,
 						GANTRY_THRESHOLD = 0;
 
 // MotorCommand struct
@@ -43,7 +43,9 @@ task main()
 {
 	while (true)
 	{
-		mainMenu();
+		//mainMenu();
+	home();
+	mainMenu();
 	}
 }
 
@@ -59,43 +61,66 @@ void autoMovePen(float x, float y)
 }
 
 void manualMove(){
-	while(getButtonPress(buttonBack)){
+	eraseDisplay();
+	displayBigTextLine(1, "Manual Move");
+	float x=0;
+	float y=0;
+	while(!getButtonPress(buttonBack)){
 		if(getButtonPress(buttonUp)){
-			movePen(0, 50);
+			y = 20;
 		}
 		else if(getButtonPress(buttonDown)){
-			movePen(0, -50);
-		}
-		else if(getButtonPress(buttonLeft)){
-			movePen(-50, 0);
-		}
-		else if(getButtonPress(buttonRight)){
-			movePen(50, 0);
+			y = -20;
 		}
 		else{
-			movePen(0, 0);
+			y = 0;
+		}
+		if(getButtonPress(buttonLeft)){
+			x = 20;
+		}
+		else if(getButtonPress(buttonRight)){
+			x = -20;
+		}
+		else{
+			x = 0;
+		}
+		movePen(x, y);
+		if(getButtonPress(buttonEnter)){
+			clearTimer(T1);
+			while(getButtonPress(buttonEnter)){}
+			if(time1[T1] > 1000){
+				break;
+			}
+			liftLowerPen(nMotorEncoder[motorC] < 10);
 		}
 	}
 }
 
 void home(){
-		movePen(50, 0);
+	liftLowerPen(true);
+		movePen(0, -10);
 		while(!SensorValue[S1]) {}
-		movePen(0, 50);
-		while(SensorValue[S2] > Y_AXIS_HOME_DISTANCE){}
+		movePen(-10, 0);
+		while(SensorValue[S2] > Y_AXIS_HOME_DISTANCE){
+				displayBigTextLine(1, "Sensor: %f", SensorValue[S2]);
+		}
 		movePen(0, 0);
+		nMotorEncoder[motorA] = 0;
+		nMotorEncoder[motorB] = 0;
 }
 
 void liftLowerPen(bool lifted){
 	float target = lifted?PEN_UP:PEN_DOWN;
 	float measured = nMotorEncoder[motorC];
-	while(abs(target-measured)<LIFT_PEN_THRESHOLD && !getButtonPress(BACK_BUTTON)){
+
+	while(abs(target-measured)>LIFT_PEN_THRESHOLD && !getButtonPress(BACK_BUTTON)){
 		measured = nMotorEncoder[motorC];
 		float error = target-measured;
 		float output = error*PEN_KP;
 		motor[motorC] = output;
 		wait1Msec(100);
 	}
+	motor[motorC] = 0;
 }
 
 //assume the motorCommand x and y is normalized (between 0 and 1).
@@ -157,15 +182,16 @@ void mainMenu()
 	int count = 0;
 	string menuOptions[] = {"Manual", "File Print", "Exit"};
 
-	// title
-	displayCenteredBigTextLine(1, "VanGoBot");
-	drawEllipse(35, 125, 140, 100);
-	drawEllipse(35, 122, 140, 97);
-	displayCenteredBigTextLine(4, "Select a mode:");
+
 
 	// options select
 	while (count < 3)
 	{
+		// title
+		displayCenteredBigTextLine(1, "VanGoBot");
+		drawEllipse(35, 125, 140, 100);
+		drawEllipse(35, 122, 140, 97);
+		displayCenteredBigTextLine(4, "Select a mode:");
 		if(count == 0){
 			displayInverseBigStringAt(20, 60, menuOptions[0]);
 			displayBigStringAt(20, 40, menuOptions[1]);
@@ -258,10 +284,14 @@ void shutcoGoofyAhhDown()
 		{
 			if (option == 2)
 			{
+				while (getButtonPress(DOWN_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(ENTER_BUTTON))
+				{}
 				mainMenu();
 			}
 			else if (option == 1)
 			{
+				while (getButtonPress(DOWN_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(ENTER_BUTTON))
+				{}
 				liftLowerPen(true);
 				home();
 				movePen(0, 0);
