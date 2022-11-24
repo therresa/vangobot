@@ -108,20 +108,26 @@ void manualMode(){
 	float x=0;
 	float y=0;
 	while(!getButtonPress(buttonBack)){
-		if(getButtonPress(buttonUp)){
+		if(getButtonPress(buttonUp) && !getButtonPress(buttonDown)){
 			y = 20;
 		}
-		else if(getButtonPress(buttonDown)){
+		else if(getButtonPress(buttonDown) && !getButtonPress(buttonUp)){
 			y = -20;
+		}
+		else if(getButtonPress(buttonUp) && getButtonPress(buttonDown)){
+			playTone(400, 500);
 		}
 		else{
 			y = 0;
 		}
-		if(getButtonPress(buttonLeft)){
+		if(getButtonPress(buttonLeft) && !getButtonPress(buttonRight)){
 			x = -20;
 		}
 		else if(getButtonPress(buttonRight)){
 			x = 20;
+		}
+		else if(getButtonPress(buttonLeft) && getButtonPress(buttonRight)){
+			playTone(400, 500);
 		}
 		else{
 			x = 0;
@@ -132,11 +138,13 @@ void manualMode(){
 			clearTimer(T1);
 			while(getButtonPress(buttonEnter)){}
 			if(time1[T1] > 1000){
+				eraseDisplay();
 				break;
 			}
 			liftLowerPen(nMotorEncoder[motorC] < 10);
 		}
 	}
+	mainMenu();
 }
 
 void home(){
