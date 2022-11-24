@@ -14,9 +14,9 @@ Drain
 #include "PC_FileIO.c"
 
 // global constants
-const float ENCODER_TO_INCH = 0, PEN_UP = 30, PEN_DOWN = 0, GANTRY_KP = 0,
+const float ENCODER_TO_INCH = 3.0/228.0, PEN_UP = 30, PEN_DOWN = 0, GANTRY_KP = 0.5,
 						PEN_KP = 0.5, Y_AXIS_HOME_DISTANCE = 4.7, LIFT_PEN_THRESHOLD = 10,
-						GANTRY_THRESHOLD = 0;
+						GANTRY_THRESHOLD = 0, MIN_X = 0, MAX_X = 530, MIN_Y = 0, MAX_Y = 400;
 
 // MotorCommand struct
 struct MotorCommand {
@@ -27,7 +27,7 @@ struct MotorCommand {
 
 // prototypes
 void movePen(int xPower, int yPower);
-void autoMovePen(float x, float y);
+void autoMovePen(float targetX, float targetY);
 void liftLowerPen(bool lifted);
 void home();
 bool readNextCommand(TFileHandle &fin, struct MotorCommand &motorCommand);
@@ -41,23 +41,63 @@ void shutcoGoofyAhhDown();
 
 task main()
 {
-	while (true)
-	{
+	//while (true)
+	//{
 		//mainMenu();
-	home();
-	mainMenu();
-	}
+		home();
+		TFileHandle fin;
+		bool fileOkay = openReadPC(fin,"test_fileio.txt");
+		automaticMode(fin, 1, 1, 2);
+
+	//}
 }
 
 void movePen(int xPower, int yPower)
 {
-	motor[motorA] = xPower;
-	motor[motorB] = yPower;
+	if((xPower > 0 && nMotorEncoder[motorA] >= MIN_X) || (xPower < 0 && nMotorEncoder[motorA] <= MAX_X)){
+		if(xPower < -30){
+			xPower = -30;
+		}
+		if(xPower > 30){
+			xPower = 30;
+		}
+		motor[motorA] = -xPower;
+	}
+	else{
+		motor[motorA] = 0;
+	}
+	if((yPower < 0 && nMotorEncoder[motorB] >= MIN_Y) || (yPower > 0 && nMotorEncoder[motorB] <= MAX_Y)){
+		if(yPower < -30){
+			yPower = -30;
+		}
+		if(yPower > 30){
+			yPower = 30;
+		}
+		motor[motorB] = yPower;
+	}
+	else{
+		motor[motorB] = 0;
+	}
 }
 
-void autoMovePen(float x, float y)
+void autoMovePen(float targetX, float targetY)
 {
+	targetX /= -ENCODER_TO_INCH;
+	targetY /= ENCODER_TO_INCH;
+	float measuredX = -nMotorEncoder[motorA];
+	float measuredY = nMotorEncoder[motorB];
 
+	while(abs(targetX-measuredX)>GANTRY_THRESHOLD && abs(targetY-measuredY)>GANTRY_THRESHOLD){
+		measuredX = nMotorEncoder[motorA];
+	 	measuredY = nMotorEncoder[motorB];
+		float errorX = targetX-measuredX;
+		float outputX = errorX*PEN_KP;
+		float errorY = targetY-measuredY;
+		float outputY = errorY*PEN_KP;
+		movePen(outputX, outputY);
+		wait1Msec(100);
+	}
+	movePen(0, 0);
 }
 
 void manualMove(){
@@ -76,14 +116,15 @@ void manualMove(){
 			y = 0;
 		}
 		if(getButtonPress(buttonLeft)){
-			x = 20;
+			x = -20;
 		}
 		else if(getButtonPress(buttonRight)){
-			x = -20;
+			x = 20;
 		}
 		else{
 			x = 0;
 		}
+
 		movePen(x, y);
 		if(getButtonPress(buttonEnter)){
 			clearTimer(T1);
@@ -97,13 +138,13 @@ void manualMove(){
 }
 
 void home(){
+	nMotorEncoder[motorA] = 1000;
+	nMotorEncoder[motorB] = 1000;
 	liftLowerPen(true);
 		movePen(0, -10);
 		while(!SensorValue[S1]) {}
-		movePen(-10, 0);
-		while(SensorValue[S2] > Y_AXIS_HOME_DISTANCE){
-				displayBigTextLine(1, "Sensor: %f", SensorValue[S2]);
-		}
+		movePen(10, 0);
+		while(SensorValue[S2] > Y_AXIS_HOME_DISTANCE){}
 		movePen(0, 0);
 		nMotorEncoder[motorA] = 0;
 		nMotorEncoder[motorB] = 0;
@@ -129,13 +170,6 @@ void convertFileXYToPaperXY(float autoX, float autoY, float size, struct MotorCo
 	motorCommand.y = autoY + motorCommand.y*size;
 }
 
-void automaticMode(TFileHandle &fin, float x, float y, float size){
-	struct MotorCommand motorCommand;
-	while(readNextCommand(fin, motorCommand) && getButtonPress(BACK_BUTTON)){
-		liftLowerPen(motorCommand.liftPen);
-		autoMovePen(motorCommand.x, motorCommand.y);
-	}
-}
 
 void automaticModeMenu()
 {
@@ -159,8 +193,10 @@ bool readNextCommand(TFileHandle &fin, struct MotorCommand &motorCommand)
 
 void automaticMode(TFileHandle &fin, float x, float y, float size){
 		struct MotorCommand motorCommand;
-		while(!getButtonPress(BACK_BUTTON) && readNextCommand(fin, motorCommand))
+		while(!getButtonPress(ENTER_BUTTON) && readNextCommand(fin, motorCommand))
 		{
+			displayBigTextLine(2, "x: %f", motorCommand.x);
+			displayBigTextLine(6, "y: %f", motorCommand.y);
 			convertFileXYToPaperXY(x, y, size, motorCommand);
 			liftLowerPen(motorCommand.liftPen);
 			autoMovePen(motorCommand.x, motorCommand.y);
@@ -181,8 +217,6 @@ void mainMenu()
 	eraseDisplay();
 	int count = 0;
 	string menuOptions[] = {"Manual", "File Print", "Exit"};
-
-
 
 	// options select
 	while (count < 3)
