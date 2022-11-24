@@ -31,7 +31,7 @@ void autoMovePen(float targetX, float targetY);
 void liftLowerPen(bool lifted);
 void home();
 bool readNextCommand(TFileHandle &fin, struct MotorCommand &motorCommand);
-void manualMove();
+void manualMode();
 void convertFileXYToPaperXY(float autoX, float autoY, float size, struct MotorCommand &motorCommand);
 void automaticMode(TFileHandle &fin, float x, float y, float size);
 void automaticModeMenu();
@@ -99,9 +99,12 @@ void autoMovePen(float targetX, float targetY)
 	movePen(0, 0);
 }
 
-void manualMove(){
+void manualMode(){
 	eraseDisplay();
-	displayBigTextLine(1, "Manual Move");
+	displayCenteredBigTextLine(2, "Manual Mode");
+	displayBigTextLine(4, "Press and hold");
+	displayBigTextLine(6, "the 'enter' key");
+	displayBigTextLine(8, "to exit");
 	float x=0;
 	float y=0;
 	while(!getButtonPress(buttonBack)){
@@ -350,7 +353,7 @@ void mainMenu()
 			{}
 			if (count == 0)
 			{
-				manualMove();
+				manualMode();
 			}
 			else if (count == 1)
 			{
