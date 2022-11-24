@@ -41,15 +41,14 @@ void shutcoGoofyAhhDown();
 
 task main()
 {
-	//while (true)
-	//{
-		//mainMenu();
+	while (true)
+	{
+		mainMenu();
 		home();
 		TFileHandle fin;
 		bool fileOkay = openReadPC(fin,"test_fileio.txt");
-		automaticMode(fin, 1, 1, 2);
-
-	//}
+		//automaticMode(fin, 1, 1, 2);
+	}
 }
 
 void movePen(int xPower, int yPower)
@@ -173,7 +172,100 @@ void convertFileXYToPaperXY(float autoX, float autoY, float size, struct MotorCo
 
 void automaticModeMenu()
 {
+	eraseDisplay();
 
+	// set width
+	float width = 0;
+	displayBigTextLine(1, "Select width:");
+
+	//wait for all buttons to be released
+	while (getButtonPress(ENTER_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(DOWN_BUTTON)) { }
+
+	while (!getButtonPress(ENTER_BUTTON))
+	{
+		displayCenteredBigTextLine(4, "%f", width);
+		while (!getButtonPress(ENTER_BUTTON) && !getButtonPress(UP_BUTTON) && !getButtonPress(DOWN_BUTTON)) { }
+		if (getButtonPress(DOWN_BUTTON))
+		{
+			width -= 0.5;
+		}
+		else if (getButtonPress(UP_BUTTON))
+		{
+			width += 0.5;
+		}
+		while (getButtonPress(UP_BUTTON) || getButtonPress(DOWN_BUTTON)) { }
+		if(width >= 5){
+			width = 5;
+		}
+		if(width <= 0){
+			width = 0;
+		}
+	}
+
+	// wait for all buttons to be released
+	while (getButtonPress(ENTER_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(DOWN_BUTTON)) { }
+	eraseDisplay();
+
+	displayCenteredBigTextLine(1, "Select x:");
+
+	// set x coordinate
+	float x = 0;
+	while (!getButtonPress(ENTER_BUTTON))
+	{
+		displayCenteredBigTextLine(4, "%f", x);
+		while (!getButtonPress(ENTER_BUTTON) && !getButtonPress(UP_BUTTON) && !getButtonPress(DOWN_BUTTON)) { }
+		if (getButtonPress(DOWN_BUTTON))
+		{
+			x -= 0.5;
+		}
+		else if (getButtonPress(UP_BUTTON))
+		{
+			x += 0.5;
+		}
+		while (getButtonPress(UP_BUTTON) || getButtonPress(DOWN_BUTTON)) { }
+		if(x <= 0){
+			x = 0;
+		}
+		if(x >= 6.5){
+			x = 6.5;
+		}
+	}
+
+	// wait for all buttons to be released
+	while (getButtonPress(ENTER_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(DOWN_BUTTON)) { }
+	eraseDisplay();
+
+	displayBigTextLine(1, "Select y:");
+	float y = 0;
+	while (!getButtonPress(ENTER_BUTTON))
+	{
+		displayCenteredBigTextLine(4, "%f", y);
+		while (!getButtonPress(ENTER_BUTTON) && !getButtonPress(UP_BUTTON) && !getButtonPress(DOWN_BUTTON)) { }
+
+		if (getButtonPress(DOWN_BUTTON))
+		{
+			y -= 0.5;
+		}
+		else if (getButtonPress(UP_BUTTON))
+		{
+			y += 0.5;
+		}
+
+		while (getButtonPress(UP_BUTTON) || getButtonPress(DOWN_BUTTON)) { }
+
+		if(y <= 0){
+			y = 0;
+		}
+		if(y >= 5){
+			y = 5;
+		}
+	}
+
+	while (getButtonPress(ENTER_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(DOWN_BUTTON)) { }
+
+	TFileHandle fin;
+	bool fileOkay = openReadPC(fin,"test_fileio.txt");
+	automaticMode(fin, x, y, width);
 }
 
 bool readNextCommand(TFileHandle &fin, struct MotorCommand &motorCommand)
@@ -192,12 +284,13 @@ bool readNextCommand(TFileHandle &fin, struct MotorCommand &motorCommand)
 }
 
 void automaticMode(TFileHandle &fin, float x, float y, float size){
+	eraseDisplay();
 		struct MotorCommand motorCommand;
 		while(!getButtonPress(ENTER_BUTTON) && readNextCommand(fin, motorCommand))
 		{
+			convertFileXYToPaperXY(x, y, size, motorCommand);
 			displayBigTextLine(2, "x: %f", motorCommand.x);
 			displayBigTextLine(6, "y: %f", motorCommand.y);
-			convertFileXYToPaperXY(x, y, size, motorCommand);
 			liftLowerPen(motorCommand.liftPen);
 			autoMovePen(motorCommand.x, motorCommand.y);
 		}
