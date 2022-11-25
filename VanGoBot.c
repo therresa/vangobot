@@ -270,7 +270,7 @@ bool automaticModeMenu()
 	TFileHandle fin;
 	bool fileOkay = openReadPC(fin,fileName);
 
-	if ((x + width > (MAX_X * ENCODER_TO_INCH)) || (y + width > (MAX_Y * ENCODER_TO_INCH))
+	if ((x + width > 5) || (y + width > 6.5)
 	{
 		eraseDisplay();
 		displayCenteredBigTextLine(4, "Your selected file");
@@ -316,6 +316,7 @@ bool automaticModeMenu()
 			{}
 		}
 	}
+	automaticMode(fin, x, y, width);
 	return true;
 }
 
