@@ -64,6 +64,7 @@ void movePen(int xPower, int yPower)
 		motor[motorA] = -xPower;
 	}
 	else{
+		playSound(soundBeepBeep);
 		motor[motorA] = 0;
 	}
 	if((yPower < 0 && nMotorEncoder[motorB] >= MIN_Y) || (yPower > 0 && nMotorEncoder[motorB] <= MAX_Y)){
@@ -77,6 +78,7 @@ void movePen(int xPower, int yPower)
 	}
 	else{
 		motor[motorB] = 0;
+		playSound(soundBeepBeep);
 	}
 }
 
