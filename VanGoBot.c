@@ -42,19 +42,13 @@ void fileSelectMenu(string &fileName);
 
 task main()
 {
-	while (true)
-	{
-		mainMenu();
-		home();
-		TFileHandle fin;
-		bool fileOkay = openReadPC(fin,"test_fileio.txt");
-		//automaticMode(fin, 1, 1, 2);
-	}
+	home();
+	mainMenu();
 }
 
 void movePen(int xPower, int yPower)
 {
-	if((xPower > 0 && nMotorEncoder[motorA] >= MIN_X) || (xPower < 0 && nMotorEncoder[motorA] <= MAX_X)){
+	if((xPower >= 0 && nMotorEncoder[motorA] >= MIN_X) || (xPower <= 0 && nMotorEncoder[motorA] <= MAX_X)){
 		if(xPower < -30){
 			xPower = -30;
 		}
@@ -64,10 +58,10 @@ void movePen(int xPower, int yPower)
 		motor[motorA] = -xPower;
 	}
 	else{
-		playSound(soundBeepBeep);
 		motor[motorA] = 0;
+		playTone(400, 1);
 	}
-	if((yPower < 0 && nMotorEncoder[motorB] >= MIN_Y) || (yPower > 0 && nMotorEncoder[motorB] <= MAX_Y)){
+	if((yPower <= 0 && nMotorEncoder[motorB] >= MIN_Y) || (yPower >= 0 && nMotorEncoder[motorB] <= MAX_Y)){
 		if(yPower < -30){
 			yPower = -30;
 		}
@@ -78,7 +72,7 @@ void movePen(int xPower, int yPower)
 	}
 	else{
 		motor[motorB] = 0;
-		playSound(soundBeepBeep);
+		playTone(400, 1);
 	}
 }
 
