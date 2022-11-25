@@ -33,7 +33,7 @@ bool readNextCommand(TFileHandle &fin, struct MotorCommand &motorCommand);
 void manualMode();
 void convertFileXYToPaperXY(float autoX, float autoY, float size, struct MotorCommand &motorCommand);
 void automaticMode(TFileHandle &fin, float x, float y, float size);
-void automaticModeMenu();
+bool automaticModeMenu();
 void mainMenu();
 void configureSensors();
 void shutcoGoofyAhhDown();
@@ -171,7 +171,7 @@ void convertFileXYToPaperXY(float autoX, float autoY, float size, struct MotorCo
 }
 
 
-void automaticModeMenu()
+bool automaticModeMenu()
 {
 	string fileName = "";
 	fileSelectMenu(fileName);
@@ -234,6 +234,7 @@ void automaticModeMenu()
 		}
 	}
 
+
 	// wait for all buttons to be released
 	while (getButtonPress(ENTER_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(DOWN_BUTTON)) { }
 	eraseDisplay();
@@ -268,7 +269,54 @@ void automaticModeMenu()
 
 	TFileHandle fin;
 	bool fileOkay = openReadPC(fin,fileName);
-	automaticMode(fin, x, y, width);
+
+	if ((x + width > (MAX_X * ENCODER_TO_INCH)) || (y + width > (MAX_Y * ENCODER_TO_INCH))
+	{
+		eraseDisplay();
+		displayCenteredBigTextLine(4, "Your selected file");
+		displayCenteredBigTextLine(6, "will be cut off");
+		displayCenteredBigTextLine(8, "by the drawing bound.");
+		displayCenteredBigTextLine(10, "Continue?");
+
+		// options
+		int option = 2;
+		while (true)
+		{
+			while (!getButtonPress(DOWN_BUTTON) && !getButtonPress(UP_BUTTON) && !getButtonPress(ENTER_BUTTON))
+			{}
+			if (getButtonPress(DOWN_BUTTON))
+			{
+				displayBigStringAt(20, 50, "Yes");
+				displayInverseBigStringAt(20, 30, "No");
+				option = 2;
+			}
+			else if(getButtonPress(UP_BUTTON))
+			{
+				displayInverseBigStringAt(20, 50, "Yes");
+				displayBigStringAt(20, 30, "No");
+				option = 1;
+			}
+			if (getButtonPress(ENTER_BUTTON))
+			{
+				if (option == 2)
+				{
+					while (getButtonPress(DOWN_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(ENTER_BUTTON))
+					{}
+					return false;
+				}
+				else if (option == 1)
+				{
+					while (getButtonPress(DOWN_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(ENTER_BUTTON))
+					{}
+					automaticMode(fin, x, y, width);
+					return true;
+				}
+			}
+			while (getButtonPress(DOWN_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(ENTER_BUTTON))
+			{}
+		}
+	}
+	return true;
 }
 
 string files[] = {
@@ -399,7 +447,10 @@ void mainMenu()
 			}
 			else if (count == 1)
 			{
-				automaticModeMenu();
+				if (!automaticModeMenu())
+				{
+					automaticModeMenu();
+				}
 			}
 			else
 			{
@@ -458,15 +509,13 @@ void shutcoGoofyAhhDown()
 			{
 				while (getButtonPress(DOWN_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(ENTER_BUTTON))
 				{}
-				mainMenu();
+				automaticModeMenu();
 			}
 			else if (option == 1)
 			{
 				while (getButtonPress(DOWN_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(ENTER_BUTTON))
 				{}
-				liftLowerPen(true);
-				home();
-				movePen(0, 0);
+
 			}
 		}
 		while (getButtonPress(DOWN_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(ENTER_BUTTON))
