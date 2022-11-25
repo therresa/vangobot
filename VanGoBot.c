@@ -453,6 +453,7 @@ void mainMenu()
 			{
 				while (!automaticModeMenu())
 				{ }
+				eraseDisplay();
 			}
 			else
 			{
