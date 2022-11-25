@@ -16,8 +16,7 @@ Drain
 // global constants
 const float ENCODER_TO_INCH = 3.0/228.0, PEN_UP = 30, PEN_DOWN = 0, GANTRY_KP = 0.5,
 						PEN_KP = 0.5, Y_AXIS_HOME_DISTANCE = 4.7, LIFT_PEN_THRESHOLD = 10,
-						GANTRY_THRESHOLD = 10, MIN_X = 0, MAX_X = 530, MIN_Y = 0, MAX_Y = 420;
-
+						GANTRY_THRESHOLD = 10, MIN_X = 0, MAX_X = 420, MIN_Y = 0, MAX_Y = 530;
 // MotorCommand struct
 struct MotorCommand {
     float x;
@@ -48,18 +47,18 @@ task main()
 
 void movePen(int xPower, int yPower)
 {
-	if((xPower >= 0 && nMotorEncoder[motorA] >= MIN_X) || (xPower <= 0 && nMotorEncoder[motorA] <= MAX_X)){
+	if((xPower <= 0 && nMotorEncoder[motorA] >= MIN_X) || (xPower >= 0 && nMotorEncoder[motorA] <= MAX_X)){
 		if(xPower < -30){
 			xPower = -30;
 		}
 		if(xPower > 30){
 			xPower = 30;
 		}
-		motor[motorA] = -xPower;
+		motor[motorA] = xPower;
 	}
 	else{
 		motor[motorA] = 0;
-		playTone(400, 1);
+		playTone(300, 1);
 	}
 	if((yPower <= 0 && nMotorEncoder[motorB] >= MIN_Y) || (yPower >= 0 && nMotorEncoder[motorB] <= MAX_Y)){
 		if(yPower < -30){
@@ -72,15 +71,15 @@ void movePen(int xPower, int yPower)
 	}
 	else{
 		motor[motorB] = 0;
-		playTone(400, 1);
+		playTone(300, 1);
 	}
 }
 
 void autoMovePen(float targetX, float targetY)
 {
-	targetX /= -ENCODER_TO_INCH;
+	targetX /= ENCODER_TO_INCH;
 	targetY /= ENCODER_TO_INCH;
-	float measuredX = -nMotorEncoder[motorA];
+	float measuredX = nMotorEncoder[motorA];
 	float measuredY = nMotorEncoder[motorB];
 
 	while(abs(targetX-measuredX)>GANTRY_THRESHOLD && abs(targetY-measuredY)>GANTRY_THRESHOLD){
@@ -142,9 +141,9 @@ void home(){
 	nMotorEncoder[motorA] = 1000;
 	nMotorEncoder[motorB] = 1000;
 	liftLowerPen(true);
-		movePen(0, -10);
+		movePen(-10, 0);
 		while(!SensorValue[S1]) {}
-		movePen(10, 0);
+		movePen(0, -10);
 		while(SensorValue[S2] > Y_AXIS_HOME_DISTANCE){}
 		movePen(0, 0);
 		nMotorEncoder[motorA] = 0;
@@ -230,8 +229,8 @@ bool automaticModeMenu()
 		if(x <= 0){
 			x = 0;
 		}
-		if(x >= 6.5){
-			x = 6.5;
+		if(x >= 5){
+			x = 5;
 		}
 	}
 
@@ -261,8 +260,8 @@ bool automaticModeMenu()
 		if(y <= 0){
 			y = 0;
 		}
-		if(y >= 5){
-			y = 5;
+		if(y >= 6.5){
+			y = 6.5;
 		}
 	}
 
@@ -271,7 +270,7 @@ bool automaticModeMenu()
 	TFileHandle fin;
 	bool fileOkay = openReadPC(fin,fileName);
 
-	if ((x + width > (MAX_X * ENCODER_TO_INCH)) || (y + width > (MAX_Y * ENCODER_TO_INCH))
+	if ((x + width > 5) || (y + width > 6.5)
 	{
 		eraseDisplay();
 		displayCenteredBigTextLine(1, "Your selected file");
@@ -320,6 +319,7 @@ bool automaticModeMenu()
 			{}
 		}
 	}
+	automaticMode(fin, x, y, width);
 	return true;
 }
 
