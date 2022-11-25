@@ -139,12 +139,11 @@ void manualMode(){
 			while(getButtonPress(buttonEnter)){}
 			if(time1[T1] > 1000){
 				eraseDisplay();
-				break;
+				return;
 			}
 			liftLowerPen(nMotorEncoder[motorC] < 10);
 		}
 	}
-	mainMenu();
 }
 
 void home(){
