@@ -14,9 +14,18 @@ Drain
 #include "PC_FileIO.c"
 
 // global constants
-const float ENCODER_TO_INCH = 3.0/228.0, PEN_UP = 30, PEN_DOWN = 0, GANTRY_KP = 0.5,
-						PEN_KP = 0.5, Y_AXIS_HOME_DISTANCE = 6, LIFT_PEN_THRESHOLD = 10,
-						GANTRY_THRESHOLD = 10, MIN_X = 0, MAX_X = 420, MIN_Y = 0, MAX_Y = 530;
+const float ENCODER_TO_INCH = 3.0/228.0, PEN_UP = 30, PEN_DOWN = 0, GANTRY_KP = 2,
+						PEN_KP = 0.5, Y_AXIS_HOME_DISTANCE = 5, LIFT_PEN_THRESHOLD = 10,
+						GANTRY_THRESHOLD = 5, MIN_X = 0, MAX_X = 420, MIN_Y = 0, MAX_Y = 510;
+
+const string files[] = {
+	"test_fileio.txt",
+	"square.txt",
+	"triangle.txt",
+	"circle.txt",
+	"test3.txt",
+	"test4.txt"
+};
 // MotorCommand struct
 struct MotorCommand {
     float x;
@@ -36,7 +45,7 @@ void automaticMode(TFileHandle &fin, float x, float y, float size);
 bool automaticModeMenu();
 void mainMenu();
 void configureSensors();
-void shutDown();
+bool shutDown();
 void fileSelectMenu(string &fileName);
 
 task main()
@@ -48,11 +57,11 @@ task main()
 void movePen(int xPower, int yPower)
 {
 	if((xPower <= 0 && nMotorEncoder[motorA] >= MIN_X) || (xPower >= 0 && nMotorEncoder[motorA] <= MAX_X)){
-		if(xPower < -30){
-			xPower = -30;
+		if(xPower < -20){
+			xPower = -20;
 		}
-		if(xPower > 30){
-			xPower = 30;
+		if(xPower > 20){
+			xPower = 20;
 		}
 		motor[motorA] = xPower;
 	}
@@ -61,11 +70,11 @@ void movePen(int xPower, int yPower)
 		playTone(300, 1);
 	}
 	if((yPower <= 0 && nMotorEncoder[motorB] >= MIN_Y) || (yPower >= 0 && nMotorEncoder[motorB] <= MAX_Y)){
-		if(yPower < -30){
-			yPower = -30;
+		if(yPower < -20){
+			yPower = -20;
 		}
-		if(yPower > 30){
-			yPower = 30;
+		if(yPower > 20){
+			yPower = 20;
 		}
 		motor[motorB] = yPower;
 	}
@@ -82,7 +91,7 @@ void autoMovePen(float targetX, float targetY)
 	float measuredX = nMotorEncoder[motorA];
 	float measuredY = nMotorEncoder[motorB];
 
-	while(abs(targetX-measuredX)>GANTRY_THRESHOLD && abs(targetY-measuredY)>GANTRY_THRESHOLD){
+	while((abs(targetX-measuredX)>GANTRY_THRESHOLD || abs(targetY-measuredY)>GANTRY_THRESHOLD) && !getButtonPress(ENTER_BUTTON)){
 		measuredX = nMotorEncoder[motorA];
 	 	measuredY = nMotorEncoder[motorB];
 		float errorX = targetX-measuredX;
@@ -93,6 +102,7 @@ void autoMovePen(float targetX, float targetY)
 		wait1Msec(100);
 	}
 	movePen(0, 0);
+	wait1Msec(1000);
 }
 
 void manualMode(){
@@ -323,14 +333,6 @@ bool automaticModeMenu()
 	return true;
 }
 
-string files[] = {
-	"test_fileio.txt",
-	"test1.txt",
-	"test2.txt",
-	"test3.txt",
-	"test4.txt"
-};
-
 void fileSelectMenu(string &fileName){
 	int selected = (sizeof(files)/sizeof(files[0]))-1;
 	while(!getButtonPress(ENTER_BUTTON)){
@@ -383,6 +385,8 @@ bool readNextCommand(TFileHandle &fin, struct MotorCommand &motorCommand)
 void automaticMode(TFileHandle &fin, float x, float y, float size){
 	eraseDisplay();
 		struct MotorCommand motorCommand;
+		liftLowerPen(true);
+		autoMovePen(x, y);
 		while(!getButtonPress(ENTER_BUTTON) && readNextCommand(fin, motorCommand))
 		{
 			convertFileXYToPaperXY(x, y, size, motorCommand);
@@ -457,7 +461,9 @@ void mainMenu()
 			else
 			{
 				// call shutdown procedure
-				shutDown();
+				if(shutDown()){
+					break;
+				}
 			}
 		}
 
@@ -474,7 +480,7 @@ void mainMenu()
 	}
 }
 
-void shutDown()
+bool shutDown()
 {
 	// are you sure?
 	eraseDisplay();
@@ -511,16 +517,17 @@ void shutDown()
 			{
 				while (getButtonPress(DOWN_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(ENTER_BUTTON))
 				{}
-				automaticModeMenu();
+				return false;
 			}
 			else if (option == 1)
 			{
 				while (getButtonPress(DOWN_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(ENTER_BUTTON))
 				{}
-
+			return true;
 			}
 		}
 		while (getButtonPress(DOWN_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(ENTER_BUTTON))
 		{}
 	}
+	return true;
 }
