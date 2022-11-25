@@ -185,6 +185,9 @@ bool automaticModeMenu()
 {
 	string fileName = "";
 	fileSelectMenu(fileName);
+	if(fileName == "FAILURE"){
+		return false;
+	}
 	eraseDisplay();
 
 	// set width
@@ -215,6 +218,14 @@ bool automaticModeMenu()
 		}
 	}
 
+	if(getButtonPress(ENTER_BUTTON)){
+			clearTimer(T1);
+			while(getButtonPress(buttonEnter)){}
+			if(time1[T1] > 1000){
+				return false;
+			}
+	}
+
 	// wait for all buttons to be released
 	while (getButtonPress(ENTER_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(DOWN_BUTTON)) { }
 	eraseDisplay();
@@ -243,7 +254,13 @@ bool automaticModeMenu()
 			x = 5;
 		}
 	}
-
+	if(getButtonPress(ENTER_BUTTON)){
+			clearTimer(T1);
+			while(getButtonPress(buttonEnter)){}
+			if(time1[T1] > 1000){
+				return false;
+		}
+	}
 
 	// wait for all buttons to be released
 	while (getButtonPress(ENTER_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(DOWN_BUTTON)) { }
@@ -274,7 +291,13 @@ bool automaticModeMenu()
 			y = 6.5;
 		}
 	}
-
+	if(getButtonPress(ENTER_BUTTON)){
+			clearTimer(T1);
+			while(getButtonPress(buttonEnter)){}
+			if(time1[T1] > 1000){
+				return false;
+		}
+	}
 	while (getButtonPress(ENTER_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(DOWN_BUTTON)) { }
 
 	TFileHandle fin;
@@ -363,8 +386,15 @@ void fileSelectMenu(string &fileName){
 		}
 		while(getButtonPress(UP_BUTTON) || getButtonpress(DOWN_BUTTON)){}
 	}
-	while(getButtonPress(ENTER_BUTTON)){}
-	fileName = files[selected];
+	clearTimer(T1);
+	while(getButtonPress(buttonEnter)){}
+	if(time1[T1] > 1000){
+		eraseDisplay();
+		fileName = "FAILURE";
+	}
+	else{
+		fileName = files[selected];
+	}
 }
 
 bool readNextCommand(TFileHandle &fin, struct MotorCommand &motorCommand)
@@ -455,8 +485,7 @@ void mainMenu()
 			}
 			else if (count == 1)
 			{
-				while (!automaticModeMenu())
-				{ }
+				automaticModeMenu();
 			}
 			else
 			{
