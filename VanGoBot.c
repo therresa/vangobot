@@ -309,7 +309,6 @@ bool automaticModeMenu()
 					while (getButtonPress(DOWN_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(ENTER_BUTTON))
 					{}
 					automaticMode(fin, x, y, width);
-					return true;
 				}
 			}
 			while (getButtonPress(DOWN_BUTTON) || getButtonPress(UP_BUTTON) || getButtonPress(ENTER_BUTTON))
