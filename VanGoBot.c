@@ -404,13 +404,13 @@ void configureSensors()
 
 void mainMenu()
 {
-	eraseDisplay();
 	int count = 0;
 	string menuOptions[] = {"Manual", "File Print", "Exit"};
 
 	// options select
 	while (count < 3)
 	{
+		eraseDisplay();
 		// title
 		displayCenteredBigTextLine(1, "VanGoBot");
 		drawEllipse(35, 125, 140, 100);
@@ -453,7 +453,6 @@ void mainMenu()
 			{
 				while (!automaticModeMenu())
 				{ }
-				eraseDisplay();
 			}
 			else
 			{
