@@ -274,10 +274,10 @@ bool automaticModeMenu()
 	if ((x + width > (MAX_X * ENCODER_TO_INCH)) || (y + width > (MAX_Y * ENCODER_TO_INCH))
 	{
 		eraseDisplay();
-		displayCenteredBigTextLine(4, "Your selected file");
-		displayCenteredBigTextLine(6, "will be cut off");
-		displayCenteredBigTextLine(8, "by the drawing bound.");
-		displayCenteredBigTextLine(10, "Continue?");
+		displayCenteredBigTextLine(1, "Your selected file");
+		displayCenteredBigTextLine(3, "will be cut off");
+		displayCenteredBigTextLine(5, "by the drawing bound.");
+		displayCenteredBigTextLine(7, "Continue?");
 
 		// options
 		int option = 2;
