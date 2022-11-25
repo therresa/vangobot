@@ -15,7 +15,7 @@ Drain
 
 // global constants
 const float ENCODER_TO_INCH = 3.0/228.0, PEN_UP = 30, PEN_DOWN = 0, GANTRY_KP = 0.5,
-						PEN_KP = 0.5, Y_AXIS_HOME_DISTANCE = 4.7, LIFT_PEN_THRESHOLD = 10,
+						PEN_KP = 0.5, Y_AXIS_HOME_DISTANCE = 6, LIFT_PEN_THRESHOLD = 10,
 						GANTRY_THRESHOLD = 10, MIN_X = 0, MAX_X = 420, MIN_Y = 0, MAX_Y = 530;
 // MotorCommand struct
 struct MotorCommand {
