@@ -273,10 +273,10 @@ bool automaticModeMenu()
 	if ((x + width > 5) || (y + width > 6.5)
 	{
 		eraseDisplay();
-		displayCenteredBigTextLine(4, "Your selected file");
-		displayCenteredBigTextLine(6, "will be cut off");
-		displayCenteredBigTextLine(8, "by the drawing bound.");
-		displayCenteredBigTextLine(10, "Continue?");
+		displayCenteredBigTextLine(1, "Your selected file");
+		displayCenteredBigTextLine(3, "will be cut off");
+		displayCenteredBigTextLine(5, "by the drawing bound.");
+		displayCenteredBigTextLine(7, "Continue?");
 
 		// options
 		int option = 2;
