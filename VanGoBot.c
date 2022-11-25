@@ -36,7 +36,7 @@ void automaticMode(TFileHandle &fin, float x, float y, float size);
 bool automaticModeMenu();
 void mainMenu();
 void configureSensors();
-void shutcoGoofyAhhDown();
+void shutDown();
 void fileSelectMenu(string &fileName);
 
 task main()
@@ -458,7 +458,7 @@ void mainMenu()
 			else
 			{
 				// call shutdown procedure
-				shutcoGoofyAhhDown();
+				shutDown();
 			}
 		}
 
@@ -475,7 +475,7 @@ void mainMenu()
 	}
 }
 
-void shutcoGoofyAhhDown()
+void shutDown()
 {
 	// are you sure?
 	eraseDisplay();
