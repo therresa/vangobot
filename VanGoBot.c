@@ -164,7 +164,7 @@ void liftLowerPen(bool lifted){
 	motor[motorC] = 0;
 }
 
-//assume the motorCommand x and y is normalized (between 0 and 1).
+// assume the motorCommand x and y is normalized (between 0 and 1).
 void convertFileXYToPaperXY(float autoX, float autoY, float size, struct MotorCommand &motorCommand){
 	motorCommand.x = autoX + motorCommand.x*size;
 	motorCommand.y = autoY + motorCommand.y*size;
@@ -280,6 +280,9 @@ bool automaticModeMenu()
 
 		// options
 		int option = 2;
+		displayBigStringAt(20, 50, "Yes");
+		displayInverseBigStringAt(20, 30, "No");
+
 		while (true)
 		{
 			while (!getButtonPress(DOWN_BUTTON) && !getButtonPress(UP_BUTTON) && !getButtonPress(ENTER_BUTTON))
